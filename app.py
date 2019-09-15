@@ -1,11 +1,13 @@
 import tkinter as tk
 import problem27_module as p27
+import problem27_module as p24
 
 # Installing image utility
 from PIL import Image, ImageTk
 import Pmw # Python MegaWidget module
 
 global_frames = None
+global_problemsolutions = None
 
 class Home(tk.Tk): 
     def __init__(self, *kwargs, **args):
@@ -18,7 +20,9 @@ class Home(tk.Tk):
         
         self.frames = {}
         global global_frames
-        global_frames = {'Project-27': project_solution1,'Project-24': project_solution2}
+        global global_problemsolutions
+        global_frames = {'Project-27': project_solution,'Project-24': project_solution2}
+        global_problemsolutions = {'Project-27': p27,'Project-24': p24}
         
         main = MainPage(container, self)
         self.frames[MainPage] = main
@@ -32,12 +36,22 @@ class Home(tk.Tk):
         self.showframe(MainPage)
         
     def showframe(self, frm):
+        if frm is MainPage:
+            self.geometry('')
+        else:
+            self.geometry('500x400')
+        
         # removing all frames from grid
         for f in self.frames.values():
             f.grid_remove()
         frame = self.frames[frm]
         frame.grid(row=0, column=0, sticky='nsew')
         frame.tkraise()
+    
+    def showsolution(self, solution):
+        self.showframe(project_solution)
+        project_solution.selected_solution = solution
+        
 
 class MainPage(tk.Frame):
     selectedframe = None
@@ -57,33 +71,52 @@ class MainPage(tk.Frame):
         
         combobox = Pmw.ComboBox(controlframe, label_text='Projects', labelpos='wn',
                         listbox_width=24, dropdown=1,
-                        selectioncommand=self.choseEntery,
+                        selectioncommand=self.chooseEntery,
                         scrolledlist_items=global_frames.keys())
         combobox.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=8, pady=8)
         combobox.selectitem(list(global_frames.keys())[0])
+        self.chooseEntery(list(global_frames.keys())[0])
         
-        goBtn = tk.Button(controlframe, text='GO', command= lambda: controller.showframe(global_frames[self.selectedframe]))
+        goBtn = tk.Button(controlframe, text='GO', command= lambda: controller.showsolution(global_problemsolutions[self.selectedframe]))
         goBtn.pack(side=tk.TOP, fill=tk.BOTH)
         
-    def choseEntery(self, entry):
+    def chooseEntery(self, entry):
         print('selected %s' % entry)
         self.selectedframe = entry
 
-class project_solution1(tk.Frame):
+class project_solution(tk.Frame):
+    selected_solution = None
+    output = None
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         
-        solve_btn = tk.Button(self, text='Solve', command=self.solve)
-        solve_btn.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        solution_container = tk.Frame(self)
+        solution_container.pack(side=tk.TOP, fill=tk.X, pady=(8, 0))
+        
+        text = tk.Text(solution_container, height=19, width=56)
+        scroll = tk.Scrollbar(solution_container, command=text.yview)
+        text_lbl = tk.Label(solution_container, text='Solution')
+        text.configure(yscrollcommand=scroll.set)
+        text.tag_configure('bold_italics', font=('Verdana', 12, 'bold', 'italic'))
+        text.tag_configure('big', font=('Verdana', 24, 'bold'))
+        text.tag_configure('color', foreground='blue', font=('Tempus Sans ITC', 14))
+        text.tag_configure('groove', relief=tk.GROOVE, borderwidth=2)
+        text_lbl.pack(side=tk.TOP)
+        text.pack(side=tk.LEFT, padx=10, pady=10)
+        scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        solve_btn = tk.Button(self, text='Solve', command= lambda: text.insert(tk.END, self.solve() + '\n'))
+        solve_btn.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True, padx=8, pady=(0, 8))
     
     def solve(self):
-        pass
+        self.output = self.selected_solution.solve_out()
+        return self.output
 
 class project_solution2(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        
-        lbl = tk.Label(self, text='Project-27')
+                
+        lbl = tk.Label(self, text='Project-24')
         lbl.pack(side=tk.TOP)
         
         solve_btn = tk.Button(self, text='Solve', command=self.solve)

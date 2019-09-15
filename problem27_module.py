@@ -1,3 +1,5 @@
+from tqdm import tqdm
+
 LIMIT = 1000
 
 def checkPrime(num):
@@ -20,16 +22,40 @@ largest_prime_generator = (0, 0)
 largest_prime_record = 0
 
 def solve():
-    for a in range(1, LIMIT):
-        for b in range(1, LIMIT + 1):
+    a, b, n = 0, 0, 0
+    for a in tqdm(range(int((-1 * LIMIT)), int(LIMIT)), desc="Working on Solution: "):
+        for b in range((-1 * LIMIT), LIMIT + 1):
+            global largest_prime_generator
+            global largest_prime_record            
             n = 0
             while True:
+                if n > largest_prime_record:
+                    largest_prime_record = n
+                    largest_prime_generator = a, b
                 result = formula(n, a, b)
                 isPrime = checkPrime(result)
                 if not (isPrime):
-                    print("a, b, n: %d, %d, %d prime: %r" % (a, b, n, isPrime))
                     break
                 n = n + 1
-                print("a, b, n: %d, %d, %d prime: %r" % (a, b, n, isPrime))
 
-    print("Done")
+    print("a, b, number of primes: %d, %d, %d" % (largest_prime_generator[0], largest_prime_generator[1], largest_prime_record))
+
+def solve_out():
+    a, b, n = 0, 0, 0
+    for a in tqdm(range(int((-1 * LIMIT)), int(LIMIT)), desc="Working on Solution: "):
+        for b in range((-1 * LIMIT), LIMIT + 1):
+            global largest_prime_generator
+            global largest_prime_record            
+            n = 0
+            while True:
+                if n > largest_prime_record:
+                    largest_prime_record = n
+                    largest_prime_generator = a, b
+                result = formula(n, a, b)
+                isPrime = checkPrime(result)
+                if not (isPrime):
+                    break
+                n = n + 1
+    out = '''Behold the highest consequetive prime maker\na, b: %d, %d\nconseqetive primes: %d\ncoeffecient product: %d \ndone''' % (largest_prime_generator[0], largest_prime_generator[1], largest_prime_record, (largest_prime_generator[0] * largest_prime_generator[1]))
+    
+    return out
