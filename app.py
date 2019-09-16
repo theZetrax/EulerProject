@@ -1,6 +1,6 @@
 import tkinter as tk
 import problem27_module as p27
-import problem27_module as p24
+import problem24_module as p24
 
 # Installing image utility
 from PIL import Image, ImageTk
@@ -12,6 +12,7 @@ global_problemsolutions = None
 class Home(tk.Tk): 
     def __init__(self, *kwargs, **args):
         tk.Tk.__init__(self, *kwargs, **args)
+        self.resizable(0, 0)
         
         self.title('EulerProject')
         
@@ -21,7 +22,7 @@ class Home(tk.Tk):
         self.frames = {}
         global global_frames
         global global_problemsolutions
-        global_frames = {'Project-27': project_solution,'Project-24': project_solution2}
+        global_frames = {'Solutions': project_solution,}
         global_problemsolutions = {'Project-27': p27,'Project-24': p24}
         
         main = MainPage(container, self)
@@ -52,7 +53,6 @@ class Home(tk.Tk):
         self.showframe(project_solution)
         project_solution.selected_solution = solution
         
-
 class MainPage(tk.Frame):
     selectedframe = None
     def __init__(self, parent, controller):
@@ -72,10 +72,10 @@ class MainPage(tk.Frame):
         combobox = Pmw.ComboBox(controlframe, label_text='Projects', labelpos='wn',
                         listbox_width=24, dropdown=1,
                         selectioncommand=self.chooseEntery,
-                        scrolledlist_items=global_frames.keys())
+                        scrolledlist_items=global_problemsolutions.keys())
         combobox.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=8, pady=8)
-        combobox.selectitem(list(global_frames.keys())[0])
-        self.chooseEntery(list(global_frames.keys())[0])
+        combobox.selectitem(list(global_problemsolutions.keys())[0])
+        self.chooseEntery(list(global_problemsolutions.keys())[0])
         
         goBtn = tk.Button(controlframe, text='GO', command= lambda: controller.showsolution(global_problemsolutions[self.selectedframe]))
         goBtn.pack(side=tk.TOP, fill=tk.BOTH)
@@ -109,24 +109,8 @@ class project_solution(tk.Frame):
         solve_btn.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True, padx=8, pady=(0, 8))
     
     def solve(self):
-        self.output = self.selected_solution.solve_out()
-        return self.output
-
-class project_solution2(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-                
-        lbl = tk.Label(self, text='Project-24')
-        lbl.pack(side=tk.TOP)
-        
-        solve_btn = tk.Button(self, text='Solve', command=self.solve)
-        solve_btn.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        
-    
-    def solve(self):
-        pass
+        self.output = self.selected_solution.solve()
+        return "Problem Definition\n" + self.selected_solution.problem_definition + "\nSolution: " + self.output
 
 app = Home()
 app.mainloop()
-
-# p27.solve()
