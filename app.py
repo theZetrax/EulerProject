@@ -19,15 +19,20 @@ class Home(tk.Tk):
         container = tk.Frame(self)
         container.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         
+        menubar = tk.Menu(self)
+        menumenu = tk.Menu(menubar, tearoff=0)
+        menumenu.add_command(label="Go to Menu", command= lambda: self.showframe(MainPage))
+        menumenu.add_separator()
+        menumenu.add_command(label="Exit", command= lambda: exit())
+        menubar.add_cascade(label="File", menu=menumenu)
+        
+        self.config(menu=menubar)
+        
         self.frames = {}
         global global_frames
         global global_problemsolutions
-        global_frames = {'Solutions': project_solution,}
+        global_frames = {'MainPage': MainPage, 'Solutions': project_solution}
         global_problemsolutions = {'Project-27': p27,'Project-24': p24}
-        
-        main = MainPage(container, self)
-        self.frames[MainPage] = main
-        main.grid(row=0, column=0, sticky='nsew')
         
         for F in global_frames.values():
             frame = F(container, self)
@@ -39,6 +44,7 @@ class Home(tk.Tk):
     def showframe(self, frm):
         if frm is MainPage:
             self.geometry('')
+            self.title('EulerProject')
         else:
             self.geometry('500x400')
         
@@ -52,6 +58,7 @@ class Home(tk.Tk):
     def showsolution(self, solution):
         self.showframe(project_solution)
         project_solution.selected_solution = solution
+        self.frames[project_solution].show_description()
         
 class MainPage(tk.Frame):
     selectedframe = None
@@ -90,27 +97,36 @@ class project_solution(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         
+        self.controller = controller
+        
         solution_container = tk.Frame(self)
         solution_container.pack(side=tk.TOP, fill=tk.X, pady=(8, 0))
         
-        text = tk.Text(solution_container, height=19, width=56)
-        scroll = tk.Scrollbar(solution_container, command=text.yview)
+        self.text = tk.Text(solution_container, height=19, width=56)
+        scroll = tk.Scrollbar(solution_container, command=self.text.yview)
         text_lbl = tk.Label(solution_container, text='Solution')
-        text.configure(yscrollcommand=scroll.set)
-        text.tag_configure('bold_italics', font=('Verdana', 12, 'bold', 'italic'))
-        text.tag_configure('big', font=('Verdana', 24, 'bold'))
-        text.tag_configure('color', foreground='blue', font=('Tempus Sans ITC', 14))
-        text.tag_configure('groove', relief=tk.GROOVE, borderwidth=2)
+        self.text.configure(yscrollcommand=scroll.set)
+        self.text.tag_configure('title', font=('Verdana', 12, 'bold', 'italic'))
+        self.text.tag_configure('definition', foreground='grey', font=('Verdana', 11))
+        self.text.tag_configure('solution_tag', foreground='red', font=('Verdana', 12, 'bold'))
+        self.text.tag_configure('solution', font=('Verdana', 14))
         text_lbl.pack(side=tk.TOP)
-        text.pack(side=tk.LEFT, padx=10, pady=10)
+        self.text.pack(side=tk.LEFT, padx=10, pady=10)
         scroll.pack(side=tk.RIGHT, fill=tk.Y)
         
-        solve_btn = tk.Button(self, text='Solve', command= lambda: text.insert(tk.END, self.solve() + '\n'))
+        solve_btn = tk.Button(self, text='Solve', command= lambda: self.text.insert(tk.END,  self.solve() + '\n', 'solution'))
         solve_btn.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True, padx=8, pady=(0, 8))
     
     def solve(self):
         self.output = self.selected_solution.solve()
-        return "Problem Definition\n" + self.selected_solution.problem_definition + "\nSolution: " + self.output
+        return self.output
+    
+    def show_description(self):
+        self.text.delete('1.0', tk.END)
+        self.text.insert(tk.END, self.selected_solution.problem_name + '\n', 'title')
+        self.text.insert(tk.END, self.selected_solution.problem_definition + '\n', 'definition')
+        self.text.insert(tk.END, 'Solution\n', 'solution_tag')
+        self.controller.title(self.selected_solution.problem_name)
 
 app = Home()
 app.mainloop()
